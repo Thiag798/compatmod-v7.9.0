@@ -92,10 +92,5 @@ Na primeira execução, gera `config/compatmod.properties`:
 - **Adicionado**: Git-patch subsystem. Patch server Flask, ModpackIdentifier, comandos modpack/patch-test, MixinModelBakery dispatch, testes JUnit 5
 - **Corrigido**: Box-drawing chars no `patch_server.py`, delimitador " no `VirtualModelLoader`, `sendPacket`->`sendPatch`
 
-## Publicação
-
-1. `./gradlew build` -> `build/libs/compatmod-7.9.0.jar`
-2. Publique no CurseForge, Modrinth, GitHub Releases
-3. Checklist build limpo, testes OK, `compatmod` status healthy, tag v7.9.0
 
 Licença MIT - CompatMod Team 2026
