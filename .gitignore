@@ -1,0 +1,33 @@
+# Arquivos de build e diretórios
+build/
+.gradle/
+
+# Logs
+logs/
+
+# Arquivos de configuração gerados
+*.properties
+
+# Dependências do wrapper Gradle (se não forem versionadas)
+!gradle-wrapper.jar
+
+# Arquivos de IDE
+.idea/
+.project/
+.classpath/
+.settings/
+*.iml
+*.ipr
+*.iws
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos temporários
+*.tmp
+*.bak
+*~
+
+# Arquivos de dados
+data/

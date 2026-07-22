@@ -1,0 +1,11 @@
+
+modLoader="javafml"
+loaderVersion="[43,)"
+license="MIT"
+
+[[mods]]
+modId="compatmod"
+version=7.8.0
+displayName="CompatMod"
+authors="Admin"
+description="Compatibilidade de versões para Minecraft Forge"

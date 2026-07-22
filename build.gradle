@@ -1,0 +1,46 @@
+
+plugins {
+    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'org.spongepowered.mixin' version '0.7.+'
+}
+
+group = 'com.example'
+version = '7.9.0'
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
+}
+
+minecraft {
+    mappings channel: 'official', version: '1.19.4'
+}
+
+repositories {
+    maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
+    minecraft 'net.minecraftforge:forge:1.19.4-45.1.0'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+mixin {
+    add sourceSets.main, 'compatmod.mixins.json'
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes([
+            'Specification-Title': 'CompatMod',
+            'Specification-Version': '7.8.0',
+            'Implementation-Version': '7.8.0'
+        ])
+    }
+}
+
+
+test {
+    useJUnitPlatform()
+}
