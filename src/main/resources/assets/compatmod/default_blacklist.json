@@ -1,0 +1,4 @@
+{
+  "blacklist": [],
+  "_comment": "Add model ResourceLocations to skip patching. Format: 'modid:path' or 'modid:block/name'"
+}

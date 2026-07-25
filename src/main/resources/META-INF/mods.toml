@@ -1,11 +1,32 @@
-
 modLoader="javafml"
-loaderVersion="[43,)"
+loaderVersion="${loader_version_range}"
 license="MIT"
+issueTrackerURL="https://github.com/compatmod/issues"
 
 [[mods]]
-modId="compatmod"
-version=7.8.0
-displayName="CompatMod"
-authors="Admin"
-description="Compatibilidade de versões para Minecraft Forge"
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+logoFile="logo.png"
+credits="CompatMod Team"
+authors="CompatMod Team"
+description='''
+CompatMod v8.2.0 -- Dynamic model compatibility patcher for Forge 1.21.1.
+Applies JSON-based patches to BlockModel at load time via Mixin.
+Features: glass cullface fix, ambient occlusion toggle, UV correction,
+safe mode, blacklist system, and transform logging.
+'''
+
+[[dependencies.${mod_id}]]
+modId="forge"
+mandatory=true
+versionRange="${loader_version_range}"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.21.1,1.22)"
+ordering="NONE"
+side="BOTH"

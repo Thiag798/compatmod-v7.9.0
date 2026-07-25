@@ -1,46 +1,121 @@
-
 plugins {
-    id 'net.minecraftforge.gradle' version '5.1.+'
-    id 'org.spongepowered.mixin' version '0.7.+'
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
+    id 'org.spongepowered.mixin' version '0.7.38'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 
-group = 'com.example'
-version = '7.9.0'
+version = "${minecraft_version}-${mod_version}"
+group = mod_group_id
+base { archivesName = mod_id }
 
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
-}
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 minecraft {
-    mappings channel: 'official', version: '1.19.4'
-}
-
-repositories {
-    maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-}
-
-dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
-    minecraft 'net.minecraftforge:forge:1.19.4-45.1.0'
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    mappings channel: 'parchment', version: "${parchment_version}-${minecraft_version}"
+    copyIdeResources = true
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', mod_id
+            mods { compatmod { source sourceSets.main } }
+        }
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', mod_id
+            mods { compatmod { source sourceSets.main } }
+        }
+        gameTestServer {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', mod_id
+            mods { compatmod { source sourceSets.main } }
+        }
+        data {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            mods { compatmod { source sourceSets.main } }
+        }
+    }
 }
 
 mixin {
-    add sourceSets.main, 'compatmod.mixins.json'
+    add sourceSets.main, "${mod_id}.refmap.json"
+    config "${mod_id}.mixins.json"
 }
 
+repositories {
+    maven { url = 'https://maven.minecraftforge.net/' }
+    maven { url = 'https://repo.spongepowered.org/maven' }
+    maven { url = 'https://maven.parchmentmc.org' }
+    maven { url = 'https://libraries.minecraft.net/' }
+    mavenCentral()
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+// Forçar a inclusão do refmap no JAR final
 jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(sourceSets.main.output) {
+        include "${mod_id}.refmap.json"
+    }
+}
+
+// Garantir que a reobfuscação aconteça
+reobf {
+    jar { }
+}
+
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+jar {
     manifest {
         attributes([
-            'Specification-Title': 'CompatMod',
-            'Specification-Version': '7.8.0',
-            'Implementation-Version': '7.8.0'
+            "Specification-Title"     : mod_id,
+            "Specification-Vendor"    : "CompatModTeam",
+            "Specification-Version"   : "1",
+            "Implementation-Title"    : project.name,
+            "Implementation-Version"  : project.jar.archiveVersion,
+            "Implementation-Vendor"   : "CompatModTeam",
+            "MixinConfigs"            : "${mod_id}.mixins.json"
         ])
     }
 }
 
-
-test {
-    useJUnitPlatform()
+tasks.named('processResources', ProcessResources).configure {
+    // Pre-compute to avoid single-quote-inside-GString Groovy parser issue (Gradle 8.9+)
+    def forgeMajor = forge_version.tokenize('.')[0]
+    var replaceProperties = [
+            minecraft_version   : minecraft_version,
+            forge_version       : forge_version,
+            loader_version_range: "[${forgeMajor},)",
+            mod_id              : mod_id,
+            mod_name            : mod_name,
+            mod_version         : mod_version,
+    ]
+    inputs.properties replaceProperties
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
 }
+
+java { withSourcesJar() }

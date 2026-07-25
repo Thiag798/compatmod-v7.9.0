@@ -1,13 +1,13 @@
-
 {
-    "required": true,
-    "package": "com.example.compatmod.mixin",
-    "compatibilityLevel": "JAVA_17",
-    "refmap": "compatmod.refmap.json",
-    "mixins": [
-        "ModelLoaderMixin",
-        "TextureAtlasMixin"
-    ],
-    "client": [],
-    "server": []
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "com.compatmod.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "compatmod.refmap.json",
+  "client": [
+    "ModelBakeryMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

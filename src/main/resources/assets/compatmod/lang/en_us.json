@@ -1,1 +1,13 @@
-{}
+{
+  "compatmod.command.status": "CompatMod status: %s -- %s patches loaded, %s applied this session",
+  "compatmod.command.cache": "Model cache: %s models cached, %s patched (safe mode: %s)",
+  "compatmod.command.reload": "Reloading CompatMod config...",
+  "compatmod.command.reload.done": "Config reloaded. %s patches active.",
+  "compatmod.command.safemode.enabled": "Safe mode enabled. All patches suspended.",
+  "compatmod.command.safemode.disabled": "Safe mode disabled. Patches restored.",
+  "compatmod.command.blacklist.add": "Added %s to blacklist",
+  "compatmod.command.blacklist.remove": "Removed %s from blacklist",
+  "compatmod.command.blacklist.list": "Blacklist (%s entries): %s",
+  "compatmod.command.patches": "Active patches: %s",
+  "compatmod.command.error": "Error: %s"
+}
