@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ModelBakery.class)
 public class ModelBakeryMixin {
 
-    @Inject(method = "getModel", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getModel", at = @At("RETURN"), cancellable = true, remap = true)
     private void compatmod$onGetModel(ResourceLocation location,
                                        CallbackInfoReturnable<UnbakedModel> cir) {
         if (ModConfig.isSafeMode()) return;

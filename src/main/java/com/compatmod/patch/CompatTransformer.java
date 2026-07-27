@@ -35,20 +35,12 @@ import com.google.gson.Gson;
  * model using BlockModel.GSON: the same Gson instance + custom Deserializer
  * Minecraft uses internally, so the result behaves identically to a model
  * Minecraft loaded on its own.
- *
- * CAVEAT: I could not compile this against the real Forge/MC jars (blocked
- * in my sandbox), so I could not confirm the exact field name `GSON` still
- * exists on BlockModel in your exact 1.21.1 + Parchment mapping set. If your
- * IDE flags it, "go to definition" on BlockModel and look for the public
- * static Gson field (it existed as BlockModel.GSON across 1.18-1.21.4 per
- * public migration notes) and update the reference below accordingly.
  */
 public class CompatTransformer {
 
+    private static Gson cachedGson = null;
+
     public static UnbakedModel transform(ResourceLocation location, UnbakedModel model) {
-        // NOTE: blacklist is already checked by ModelBakeryMixin before this is
-        // called; checking it again here was dead-weight duplication, removed
-        // 2026-07-24.
         if (isBuiltinModel(location)) return model;
 
         String json = readSourceJson(location);
@@ -58,10 +50,10 @@ public class CompatTransformer {
         if (patchedJson.equals(json)) return model;
 
         try {
-           Field gsonField = BlockModel.class.getDeclaredField("GSON");
-gsonField.setAccessible(true);
-Gson gson = (Gson) gsonField.get(null);
-BlockModel patched = gson.fromJson(patchedJson, BlockModel.class);
+            Gson gson = getGson();
+            if (gson == null) return model;
+
+            BlockModel patched = gson.fromJson(patchedJson, BlockModel.class);
             CacheInspector.recordCache();
             return patched;
         } catch (Exception e) {
@@ -69,6 +61,23 @@ BlockModel patched = gson.fromJson(patchedJson, BlockModel.class);
                 location, e.getMessage());
             return model;
         }
+    }
+
+    private static Gson getGson() {
+        if (cachedGson != null) return cachedGson;
+        try {
+            // Tenta encontrar o campo GSON no BlockModel (pode estar ofuscado ou ter nomes diferentes)
+            for (Field f : BlockModel.class.getDeclaredFields()) {
+                if (f.getType() == Gson.class) {
+                    f.setAccessible(true);
+                    cachedGson = (Gson) f.get(null);
+                    return cachedGson;
+                }
+            }
+        } catch (Exception e) {
+            CompatMod.LOGGER.error("Failed to find GSON field in BlockModel: {}", e.getMessage());
+        }
+        return null;
     }
 
     /**
