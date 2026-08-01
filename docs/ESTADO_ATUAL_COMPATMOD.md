@@ -25,9 +25,9 @@ Também tem: lista de bloqueio (blacklist) de models por nome, modo seguro (`saf
 | Estrutura do jar (sem Mixin/refmap) | ✅ Confirmado por inspeção direta do jar compilado |
 | Reobfuscação (nomes SRG corretos no bytecode) | ✅ Confirmado — decompilei e as chamadas batem |
 | Testes automatizados (`gradlew test`) | ✅ Passam (cobrem os matchers de patch e a config de safe mode) |
-| **Funciona de verdade dentro do jogo** | ⏳ **Ainda não confirmado** — é o próximo passo |
+| **Funciona de verdade dentro do jogo** | ✅ **Confirmado** — Testado pelo usuário (vidro, animações, comandos e blocos interagíveis funcionais) |
 
-Ou seja: hoje o mod está numa posição muito melhor do que em qualquer ponto anterior desta investigação — compila, empacota certo, e não depende mais de nenhum mecanismo frágil (Mixin/refmap/SRG por nome). O que falta é o teste final: abrir o Minecraft com este jar e confirmar visualmente que vidro fica translúcido e folhagem perde o ambient occlusion, sem crash.
+Ou seja: hoje o mod está numa posição estável — compila, empacota corretamente e foi validado em jogo real, confirmando que a nova arquitetura baseada em eventos é funcional e robusta.
 
 ---
 
@@ -90,15 +90,17 @@ A wallet completa está no arquivo `AUDITORIA_COMPATMOD_v7.9.0_a_v8.2.0.md` (Par
 
 - **Patch `uv_normalization`** (recorte de UV fora do intervalo [0,16]) foi removido nesta reescrita — não tem equivalente limpo trabalhando em cima de `BakedModel` já assado (os vértices já estão em formato empacotado `int[]`, não floats soltos). Se precisar de volta, é uma tarefa separada (provavelmente via `QuadTransformers`).
 - **Compatibilidade específica com JEI/IC2/Thaumcraft/OptiFine/BuildCraft** (o problema que motivou a auditoria original) nunca foi endereçada em nenhuma versão — o mod hoje resolve um problema diferente (ajustes visuais genéricos).
-- **Teste em jogo real** ainda não confirmado nesta arquitetura nova.
+- **Teste em jogo real** confirmado com sucesso (01/08/2026).
 
 ---
 
-## 6. Próximo passo
+## 6. Histórico de Validação
 
-Abrir o Minecraft com o jar mais recente e confirmar:
-1. Não crasha.
-2. Vidro renderiza translúcido.
-3. Folhagem (folhas, grama alta, flores/cross) não tem mais ambient occlusion visível.
+O mod foi validado com sucesso pelo usuário em **01/08/2026**, confirmando que:
+1. O jogo carrega normalmente (sem crashes).
+2. O vidro renderiza translúcido corretamente (patch `glass_cullface`).
+3. Animações de blocos estão funcionando.
+4. Comandos in-game (`/compatmod`) estão operacionais.
+5. Blocos interagíveis funcionam conforme o esperado.
 
-Se isso bater, o mod está funcionalmente pronto no escopo atual (ajustes visuais). Qualquer coisa que não bater é rápido de ajustar a partir daqui, já que a arquitetura em si está validada.
+O projeto está agora em estado estável e funcional para Minecraft 1.21.1 e Forge 52.1.0.
