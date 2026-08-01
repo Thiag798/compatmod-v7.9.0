@@ -31,14 +31,27 @@ public class ModConfig {
 
     public static boolean isSafeMode()        { return SERVER.safeMode.get(); }
     public static void setSafeMode(boolean v) { SERVER.safeMode.set(v); }
-    public static boolean isLogEnabled()      { return SERVER.logTransforms.get(); }
+    public static boolean isLogEnabled()      { return safeGet(SERVER.logTransforms, false); }
     public static java.nio.file.Path getConfigDir() { return FMLPaths.CONFIGDIR.get(); }
 
     // FIXED (2026-07-24): this config option existed in the TOML spec (an
     // admin could list patch names under "disabledPatches") but nothing ever
     // read it back -- adding a name there had zero effect. CompatRegistry now
     // consults this to filter getPatches().
-    public static List<? extends String> getDisabledPatches() { return SERVER.disabledPatches.get(); }
+    public static List<? extends String> getDisabledPatches() {
+        return safeGet(SERVER.disabledPatches, List.of());
+    }
+
+    private static <T> T safeGet(ForgeConfigSpec.ConfigValue<T> configValue, T fallback) {
+        try {
+            return configValue.get();
+        } catch (IllegalStateException e) {
+            if (e.getMessage() != null && e.getMessage().contains("Cannot get config value before config is loaded")) {
+                return fallback;
+            }
+            throw e;
+        }
+    }
 
     public static class ServerConfig {
         public final ForgeConfigSpec.BooleanValue safeMode;

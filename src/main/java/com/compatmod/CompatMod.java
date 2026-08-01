@@ -11,6 +11,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +20,29 @@ public class CompatMod {
     public static final String MOD_ID = "compatmod";
     public static final Logger LOGGER = LoggerFactory.getLogger("CompatMod");
 
-    // Forge 51.x (1.21.1): IEventBus is injected directly into the constructor
-    public CompatMod(IEventBus modEventBus) {
+    // FIXED (2026-07-26): the previous version declared this constructor as
+    // CompatMod(IEventBus modEventBus), on the assumption -- mine, and wrong
+    // -- that Forge 1.21.1 injects the event bus directly as a constructor
+    // parameter. A real crash log proved otherwise:
+    //
+    //   java.lang.NoSuchMethodException: com.compatmod.CompatMod.<init>()
+    //       at java.base/java.lang.Class.getDeclaredConstructor(...)
+    //       at ...FMLModContainer.constructMod(FMLModContainer.java:143)
+    //
+    // FML's constructMod() called getDeclaredConstructor() with ZERO
+    // arguments and failed because no such constructor existed -- meaning
+    // this exact build (Forge 52.1.0 / MC 1.21.1) looks up the mod's main
+    // class via a no-arg constructor, not an IEventBus-parameterized one.
+    // This is the classic, long-standing pattern (still valid, if flagged
+    // deprecated-for-future-removal, as of 1.21.1) and is what the crash log
+    // proves this Forge build actually expects. Because this failed, the
+    // mod's CONSTRUCT lifecycle event never completed -- ModConfig.init(),
+    // BlacklistConfig.init(), CompatRegistry.registerBuiltin(), and
+    // LegacyTransformLogger.init() never ran at all. This was the *first*
+    // failure in the crash, ahead of (and independent from) the Mixin/refmap
+    // SRG-mismatch failure that followed it.
+    public CompatMod() {
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(new CompatCommand());
 

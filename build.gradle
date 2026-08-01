@@ -3,7 +3,6 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
-    id 'org.spongepowered.mixin' version '0.7.38'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 
@@ -48,14 +47,8 @@ minecraft {
     }
 }
 
-mixin {
-    add sourceSets.main, "${mod_id}.refmap.json"
-    config "${mod_id}.mixins.json"
-}
-
 repositories {
     maven { url = 'https://maven.minecraftforge.net/' }
-    maven { url = 'https://repo.spongepowered.org/maven' }
     maven { url = 'https://maven.parchmentmc.org' }
     maven { url = 'https://libraries.minecraft.net/' }
     mavenCentral()
@@ -63,13 +56,19 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+    }
 }
 
 // Forçar a inclusão do refmap no JAR final
@@ -95,8 +94,7 @@ jar {
             "Specification-Version"   : "1",
             "Implementation-Title"    : project.name,
             "Implementation-Version"  : project.jar.archiveVersion,
-            "Implementation-Vendor"   : "CompatModTeam",
-            "MixinConfigs"            : "${mod_id}.mixins.json"
+            "Implementation-Vendor"   : "CompatModTeam"
         ])
     }
 }

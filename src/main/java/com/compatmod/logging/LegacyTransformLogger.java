@@ -48,9 +48,15 @@ public class LegacyTransformLogger {
     }
 
     public static void log(ResourceLocation location, String patchName) {
+        log(location.toString(), patchName);
+    }
+
+    // NEW (2026-07-30): String overload, same reasoning as
+    // BlacklistConfig.isBlacklisted(String) above.
+    public static void log(String locationString, String patchName) {
         if (!ModConfig.isLogEnabled()) return;
         String entry = String.format("[%s] %s -> %s",
-            LocalDateTime.now().format(FMT), location, patchName);
+            LocalDateTime.now().format(FMT), locationString, patchName);
         queue.offer(entry);
     }
 

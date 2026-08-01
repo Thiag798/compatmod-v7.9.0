@@ -54,8 +54,19 @@ public class BlacklistConfig {
     }
     
     public static boolean isBlacklisted(ResourceLocation location) {
-        return blacklist.contains(location.toString())
-            || blacklist.contains(location.getNamespace() + ":*");
+        return isBlacklisted(location.toString());
+    }
+
+    // NEW (2026-07-30): added so callers holding only a ModelResourceLocation
+    // (which, as of 1.21, is a record that does NOT extend ResourceLocation --
+    // confirmed by two separate compile errors before this) can check the
+    // blacklist via .toString() without needing to convert to a real
+    // ResourceLocation first.
+    public static boolean isBlacklisted(String locationString) {
+        int colon = locationString.indexOf(':');
+        String namespace = colon >= 0 ? locationString.substring(0, colon) : locationString;
+        return blacklist.contains(locationString)
+            || blacklist.contains(namespace + ":*");
     }
     
     public static boolean add(String entry) {

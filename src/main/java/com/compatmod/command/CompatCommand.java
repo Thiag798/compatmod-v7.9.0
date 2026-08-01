@@ -9,8 +9,9 @@ import com.compatmod.cache.CacheInspector;
 import com.compatmod.safemode.SafeModeHandler;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
@@ -22,9 +23,8 @@ public class CompatCommand {
     @SubscribeEvent
     public void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        var root = Commands.literal("compatmod")
-            .requires(s -> s.hasPermission(2))
-            .then(Commands.literal("status")
+        var root = LiteralArgumentBuilder.<CommandSourceStack>literal("compatmod")
+            .then(LiteralArgumentBuilder.<CommandSourceStack>literal("status")
                 .executes(ctx -> {
                     int patches = CompatRegistry.getPatches().size();
                     int applied = CacheInspector.getPatchedCount();
@@ -38,7 +38,7 @@ public class CompatCommand {
                         Component.translatable(PREFIX + "status", state, patches, applied), false);
                     return 1;
                 }))
-            .then(Commands.literal("cache")
+            .then(LiteralArgumentBuilder.<CommandSourceStack>literal("cache")
                 .executes(ctx -> {
                     var snap = CacheInspector.snapshot();
                     ctx.getSource().sendSuccess(() ->
@@ -47,7 +47,7 @@ public class CompatCommand {
                             snap.safeModeActive() ? "yes" : "no"), false);
                     return 1;
                 }))
-            .then(Commands.literal("reload")
+            .then(LiteralArgumentBuilder.<CommandSourceStack>literal("reload")
                 .executes(ctx -> {
                     ctx.getSource().sendSuccess(() ->
                         Component.translatable(PREFIX + "reload"), true);
@@ -57,7 +57,7 @@ public class CompatCommand {
                             CompatRegistry.getPatches().size()), true);
                     return 1;
                 }))
-            .then(Commands.literal("safemode")
+            .then(LiteralArgumentBuilder.<CommandSourceStack>literal("safemode")
                 .executes(ctx -> {
                     boolean current = ModConfig.isSafeMode();
                     ModConfig.setSafeMode(!current);
@@ -66,9 +66,9 @@ public class CompatCommand {
                     CompatMod.LOGGER.warn("Safe mode {}", !current ? "ENABLED" : "DISABLED");
                     return 1;
                 }))
-            .then(Commands.literal("blacklist")
-                .then(Commands.literal("add")
-                    .then(Commands.argument("model", StringArgumentType.string())
+            .then(LiteralArgumentBuilder.<CommandSourceStack>literal("blacklist")
+                .then(LiteralArgumentBuilder.<CommandSourceStack>literal("add")
+                    .then(RequiredArgumentBuilder.<CommandSourceStack, String>argument("model", StringArgumentType.string())
                         .executes(ctx -> {
                             String m = StringArgumentType.getString(ctx, "model");
                             BlacklistConfig.add(m);
@@ -76,8 +76,8 @@ public class CompatCommand {
                                 Component.translatable(PREFIX + "blacklist.add", m), true);
                             return 1;
                         })))
-                .then(Commands.literal("remove")
-                    .then(Commands.argument("model", StringArgumentType.string())
+                .then(LiteralArgumentBuilder.<CommandSourceStack>literal("remove")
+                    .then(RequiredArgumentBuilder.<CommandSourceStack, String>argument("model", StringArgumentType.string())
                         .executes(ctx -> {
                             String m = StringArgumentType.getString(ctx, "model");
                             BlacklistConfig.remove(m);
@@ -85,7 +85,7 @@ public class CompatCommand {
                                 Component.translatable(PREFIX + "blacklist.remove", m), true);
                             return 1;
                         })))
-                .then(Commands.literal("list")
+                .then(LiteralArgumentBuilder.<CommandSourceStack>literal("list")
                     .executes(ctx -> {
                         var all = BlacklistConfig.getAll();
                         ctx.getSource().sendSuccess(() ->
@@ -93,7 +93,7 @@ public class CompatCommand {
                                 all.size(), String.join(", ", all)), false);
                         return 1;
                     })))
-            .then(Commands.literal("patches")
+            .then(LiteralArgumentBuilder.<CommandSourceStack>literal("patches")
                 .executes(ctx -> {
                     var names = CompatRegistry.getPatches().stream()
                         .map(p -> p.name()).toList();
